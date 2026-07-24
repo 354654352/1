@@ -567,6 +567,8 @@
             overflow: hidden;
             color: #fff;
             background: linear-gradient(135deg, #f093fb, #f5576c);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
         .btn::after {
             content: '';
@@ -580,15 +582,17 @@
             transition: opacity 0.4s ease;
             pointer-events: none;
         }
-        .btn:hover::after {
-            opacity: 1;
-        }
-        .btn:hover {
-            transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 12px 40px rgba(245, 87, 108, 0.4);
+        @media (hover: hover) and (pointer: fine) {
+            .btn:hover::after {
+                opacity: 1;
+            }
+            .btn:hover {
+                transform: translateY(-3px) scale(1.03);
+                box-shadow: 0 12px 40px rgba(245, 87, 108, 0.4);
+            }
         }
         .btn:active {
-            transform: scale(0.95) translateY(0);
+            transform: scale(0.95);
         }
 
         .btn-firework {
@@ -1220,9 +1224,6 @@
         fireworkBtn.addEventListener('click', () => {
             const count = 3 + Math.floor(Math.random() * 4);
             fireworkBurst(count);
-            // 按钮反馈
-            fireworkBtn.style.transform = 'scale(0.92)';
-            setTimeout(() => fireworkBtn.style.transform = '', 150);
             // 飘字
             spawnFloatText('🎆 咻～ 砰！', '#4facfe');
         });
@@ -1241,8 +1242,6 @@
             toggleMusic();
             const icon = musicBtn.querySelector('.btn-icon');
             icon.textContent = isMusicPlaying ? '🔊' : '🔇';
-            musicBtn.style.transform = 'scale(0.92)';
-            setTimeout(() => musicBtn.style.transform = '', 150);
         });
 
         // ============================================================

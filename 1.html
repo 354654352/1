@@ -1240,8 +1240,6 @@
         const musicBtn = document.getElementById('musicBtn');
         musicBtn.addEventListener('click', () => {
             toggleMusic();
-            const icon = musicBtn.querySelector('.btn-icon');
-            icon.textContent = isMusicPlaying ? '🔊' : '🔇';
         });
 
         // ============================================================
@@ -1323,6 +1321,8 @@
         // ============================================================
         let bgmAudio = null;
         let isMusicPlaying = false;
+        let isAudioReady = false;
+        let pendingPlayRequest = false;
 
         function initBackgroundMusic() {
             bgmAudio = new Audio('./1.ogg');
@@ -1333,48 +1333,57 @@
                 console.error('🎵 音频加载失败');
             });
 
-            bgmAudio.addEventListener('loadedmetadata', () => {
-                console.log('🎵 音频加载完成');
+            bgmAudio.addEventListener('canplay', () => {
+                isAudioReady = true;
+                if (pendingPlayRequest) {
+                    pendingPlayRequest = false;
+                    isMusicPlaying = true;
+                    updateMusicIcon();
+                    bgmAudio.play().catch(() => {});
+                }
             });
 
-            const tryPlay = () => {
-                if (!bgmAudio || isMusicPlaying) return;
+            try {
                 bgmAudio.play().then(() => {
                     isMusicPlaying = true;
-                    document.removeEventListener('click', tryPlay);
-                    document.removeEventListener('touchstart', tryPlay);
+                    isAudioReady = true;
+                    updateMusicIcon();
                 }).catch(() => {});
-            };
-
-            document.addEventListener('click', tryPlay);
-            document.addEventListener('touchstart', tryPlay);
-
-            try {
-                bgmAudio.play();
             } catch (e) {}
         }
 
         function toggleMusic() {
             if (!bgmAudio) {
                 initBackgroundMusic();
-                setTimeout(() => {
-                    if (bgmAudio) {
-                        bgmAudio.play().then(() => {
-                            isMusicPlaying = true;
-                        }).catch(() => {});
-                    }
-                }, 100);
+                pendingPlayRequest = true;
+                isMusicPlaying = true;
+                updateMusicIcon();
                 return;
             }
 
             if (isMusicPlaying) {
                 bgmAudio.pause();
                 isMusicPlaying = false;
+                updateMusicIcon();
             } else {
-                bgmAudio.play().then(() => {
+                if (!isAudioReady) {
+                    pendingPlayRequest = true;
                     isMusicPlaying = true;
-                }).catch(() => {});
+                    updateMusicIcon();
+                    return;
+                }
+                isMusicPlaying = true;
+                updateMusicIcon();
+                bgmAudio.play().catch(() => {
+                    isMusicPlaying = false;
+                    updateMusicIcon();
+                });
             }
+        }
+
+        function updateMusicIcon() {
+            const icon = musicBtn.querySelector('.btn-icon');
+            icon.textContent = isMusicPlaying ? '🔊' : '🔇';
         }
 
         initBackgroundMusic();

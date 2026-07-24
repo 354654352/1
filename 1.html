@@ -1291,13 +1291,16 @@
             fireworkInterval = null;
         });
         // 触屏支持
-        fireworkBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
+        fireworkBtn.addEventListener('touchstart', () => {
             fireworkInterval = setInterval(() => {
                 fireworkBurst(2 + Math.floor(Math.random() * 3));
             }, 300);
         });
         fireworkBtn.addEventListener('touchend', () => {
+            clearInterval(fireworkInterval);
+            fireworkInterval = null;
+        });
+        fireworkBtn.addEventListener('touchcancel', () => {
             clearInterval(fireworkInterval);
             fireworkInterval = null;
         });
